@@ -36,22 +36,22 @@
  * 一开始为了获得GFW返回的错误IP列表，多次查询被污染的域名，耗时过长
 
 = 解决方法 =
- * 创建 /etc/config/resolv.conf ，将你的本地dns服务器和国外dns服务器都添加进去，下面是例子（注意需要将其中的DNS服务器替换成你的ISP提供的）
+ * *创建 /etc/config/resolv.conf ，将你的本地dns服务器和国外dns服务器都添加进去，下面是例子（注意需要将其中的DNS服务器替换成你的ISP提供的）*
 {{{
 nameserver 202.96.199.133
 nameserver 202.97.16.195
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 }}}
- * 修改 /etc/config/dhcp ，让dnsmasq使用 /etc/config/resolv.conf 中的服务器
+ * *修改 /etc/config/dhcp ，让dnsmasq使用 /etc/config/resolv.conf 中的服务器*
 {{{
 option resolvfile	'/etc/config/resolv.conf'
 }}}
- * 修改 /etc/dnsmasq.conf ，使得dnsmasq同时查询所有dns服务器，添加一行
+ * *修改 /etc/dnsmasq.conf ，使得dnsmasq同时查询所有dns服务器，添加一行*
 {{{
 all-servers
 }}}
- * 创建 /etc/protectdns.sh ，将该文件设置成可执行，并输入如下内容
+ * *创建 /etc/protectdns.sh ，将该文件设置成可执行，并输入如下内容*
 {{{
 #!/bin/sh
 
@@ -101,13 +101,13 @@ rm $RULEFILENAME.action
 }}}
  由于上面脚本在查询GFW返回的错误IP时，使用了被污染的域名本身作为DNS服务器，因此如果以后GFW将该域名解禁，查询将不返回任何结果（但是会超时，使得耗时更长），并不会影响badip列表，只需要在开始把足够多的被污染域名填入POSIONEDDOMAIN即可。放入POSIONEDDOMAIN的域名应保证该域名以后不会提供DNS解析服务，同时该域名也不太容易被GFW解封
  另外iptables的操作都存到了/var/g.firewall.user，以方便在防火墙重启的时候重新添加规则
- * 修改 /etc/config/firewall 加入
+ * *修改 /etc/config/firewall 加入*
 {{{
 config include
 	option path /var/g.firewall.user
 }}}
  以便在防火墙重启后重新添加规则
- * 创建启动脚本 /etc/init.d/protectdns 以便随系统自动启动
+ * *创建启动脚本 /etc/init.d/protectdns 以便随系统自动启动*
 {{{
 #!/bin/sh /etc/rc.common
 
@@ -130,7 +130,7 @@ stop() {
 	}
 }}}
  执行 /etc/init.d/protectdns stop 会移除所有已添加的iptables规则并将 /var/g.firewall.user 删除，执行 /etc/init.d/protectdns start 会查找新的被污染IP
- * 为了定时更新，可以在 /etc/crontabs/root 加入
+ * *为了定时更新，可以在 /etc/crontabs/root 加入*
 {{{
 0 6 * * * /etc/init.d/protectdns start
 }}}

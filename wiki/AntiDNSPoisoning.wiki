@@ -43,10 +43,12 @@ nameserver 202.97.16.195
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 }}}
- * *修改 /etc/config/dhcp ，让dnsmasq使用 /etc/config/resolv.conf 中的服务器*
+ * *修改 /etc/config/dhcp ，让dnsmasq使用 /etc/config/resolv.conf 中的服务器,并将ISP的DNS返回不存在域名的IP地址加入黑名单*
 {{{
 option resolvfile	'/etc/config/resolv.conf'
+list bogusnxdomain     '63.251.179.17'
 }}}
+ 你需要将上面的 63.251.179.17 替换掉。比如你向ISP的DNS查询 non.exist.domain，按规范应该返回NXDOMAIN，表示该域名不存在，但是运营商通常会返回一个他自己的地址，然后将你导向到其广告页。你需要将运营商返回的那个IP添加到bogusnxdomain中。
  * *修改 /etc/dnsmasq.conf ，使得dnsmasq同时查询所有dns服务器，添加一行*
 {{{
 all-servers
@@ -129,7 +131,7 @@ stop() {
 		}
 	}
 }}}
- 执行 /etc/init.d/protectdns stop 会移除所有已添加的iptables规则并将 /var/g.firewall.user 删除，执行 /etc/init.d/protectdns start 会查找新的被污染IP
+ 执行 /etc/init.d/protectdns enable 以将该脚本设置成自动启动，执行 /etc/init.d/protectdns stop 会移除所有已添加的iptables规则并将 /var/g.firewall.user 删除，执行 /etc/init.d/protectdns start 会查找新的被污染IP并添加iptables规则
  * *为了定时更新，可以在 /etc/crontabs/root 加入*
 {{{
 0 6 * * * /etc/init.d/protectdns start
